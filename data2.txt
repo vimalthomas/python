@@ -1,0 +1,9 @@
+name,id,door_no,age
+vimal,10,20,30
+thomas,10,20,30
+joseph,20,49,45
+vimal,45,30,23
+vimal,32,11,23
+thomas,23,32,55
+vimal,1,2,3
+vimal,3,4,6
