@@ -1,3 +1,5 @@
+import mysql.connector
+
 def loadfile(filename,delimiter):
     bufsize = 65536
     with open(filename) as infile:
@@ -79,31 +81,73 @@ def like_platform(header,row,index_dict):
 
     return((common_user,mobile_user,web_user))
 
+
+
+
+# build a fuction to insert
+
+def insert_function(tablename,rows):
+    try:
+        print('\n Establishing Connection \n ')
+        cnx = mysql.connector.connect(user='testuser',password='testpwd', database='employees')
+        cursor = cnx.cursor()
+        print('connection is successful')
+    except mysql.connector.Error as err:
+        print('error in connection')
+        print(err)
+        return
+
+    query = 'insert into employees.' + tablename + ' values ' + '('+ ','.join(rows[0]) +')'
+
+    print(query)
+
+    print('the function is almost ready',tablename,len(rows))
+    return
+
+
+
+
+
 """ File Loading """
+
+
 #Open a file and store it in the memory
+print("\n 1. File Ingestion \n")
 rows=loadfile('pseudo_facebook.csv',',')
+
 
 
 """ Header and Row Creation """
 #create rows and columns
 column_names = header_data_split(rows)
 rows.pop(0)
+print("\n Header Creation \n")
+print(column_names)
+print('total record count is ',len(rows))
 
 """DATA PROFILING"""
+print("\n 2.Data Profiling \n")
 profiling_results = data_profiling(column_names,rows)
 
-for i,j in profiling_results[0].items():
-    if i=='userid':
-        print(len(j))
+for index,value in profiling_results[0].items():
+    #check for datatypes
+    if all(map(lambda x:x.isalpha(),value)):
+        print(index,'is','alphanumeric. The max length is',len(max(value)))
+
+    else:
+        print(index,'is','number. The max length is',len(max(value)))
 
 
 """UNIQUE DATA COLLECTION"""
-print('total record count is ',len(rows))
+
+
 
 """find out the following questions using sets"""
 
 """1) who has more likes, male or female?"""
 like_results = like_by_gender(column_names,rows,profiling_results[1])
+
+print('\n Number of likes in the dataset per gender \n ')
 
 print('total likes for males',like_results[0])
 
@@ -121,7 +165,7 @@ print('total likes for Unknow Gender',like_results[2])
 """
 
 platform_results = like_platform(column_names,rows,profiling_results[1])
-
+print('\n number of users per platform based on their likes received  \n ')
 print("count of common platform users",len(platform_results[0]))
 
 print("count of mobile platform users",len(platform_results[1]))
@@ -134,9 +178,12 @@ len(platform_results[1] - platform_results[2] ))
 print("count of only web users",
 len(platform_results[2] - platform_results[1] ))
 
-#perform data cleansing
+
 
 # estabilish a connection
+
+# call insert function to insert rows into table
+insert_function('fb_user',rows)
 
 # Insert data into staging table
 
